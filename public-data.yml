@@ -1,0 +1,12 @@
+---
+name: ppc64le_images
+image_mapping:
+- name: ubuntu-ibm-mldl-ppc64le
+  in:
+    repository: jarvice/ubuntu-ibm-mldl-ppc64le
+    tag: latest
+  out:
+    repository: barthy/nimbix-jarvice-ubuntu-ibm-powerai
+    tag: latest
+
+

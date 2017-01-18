@@ -1,0 +1,36 @@
+---
+
+<%
+ require 'yaml'%>
+resources:
+<%
+YAML.load(image_mapping).each do |image| %>
+- name: <%= image["name"] %>-in
+  type: docker-image
+  source:
+    repository: <%= image["in"]["repository"] %>
+    tag: <%= image["in"]["tag"] %>
+- name: <%= image["name"] %>-out
+  type: docker-image
+  source:
+    repository: <%= image["out"]["repository"] %>
+    tag: <%= image["out"]["tag"] %>
+    username: {{username}}
+    password: {{password}}
+    email: {{email}}
+<% end %>
+jobs:
+<%
+YAML.load(image_mapping).each do |image| %>
+- name: <%= image["name"] %>
+  serial: true
+  public: true
+  plan:
+  - get: <%= image["name"] %>-in
+    tags: [ppc64le]
+    trigger: true
+    params: {save: true}
+  - put: <%= image["name"] %>-out
+    params: {load: <%= image["name"] %>-in}
+    tags: [ppc64le]
+<% end %>

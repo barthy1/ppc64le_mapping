@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require 'yaml'
+require 'json'
+
+
+public_config = YAML.load(File.open("public-data.yml"))
+private_config = YAML.load(File.open("private-data.yml"))
+
+full_config = public_config.merge(private_config)
+def set_pipeline(name:, cmd:, load: [])
+  puts system(%{bash -c "fly -t pipelines set-pipeline \
+    -p #{name} \
+    -c <(#{cmd}) \
+    -l <(cat private-data.yml) \
+    #{load.collect { |l| "-l #{l}" }.join(' ')}
+  "})
+end
+
+name=full_config["name"]
+#puts "test = #{JSON.dump(full_config["image_mapping"]).class}"
+puts `erb image_mapping="#{full_config["image_mapping"].to_yaml}" ci/pipeline.yml`
+
+data=full_config['image_mapping'].to_yaml
+set_pipeline(name: name, cmd: "erb image_mapping='#{data}' ci/pipeline.yml")
